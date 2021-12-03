@@ -158,10 +158,35 @@ public abstract class Game
 
     protected void drawTexture(Texture texture, Rect target)
     {
-        this.drawTexture(texture, target, null);
+        this.drawTexture(texture, target, null, 0.0f, 0.0f, 0.0f);
     }
 
-    protected void drawTexture(Texture texture, Rect target, Rect source)
+    protected void drawTexture(Texture texture, Rect target, float rotation, float rotationOriginX, float rotationOriginY)
+    {
+        this.drawTexture(texture, target, null, rotation, rotationOriginX, rotationOriginY);
+    }
+
+    protected void drawTexture(Texture texture, Rect target, float rotation)
+    {
+        this.drawTexture(texture, target, null, rotation, target.getWidth() / 2.0f, target.getHeight() / 2.0f);
+    }
+
+    protected void drawTexture(Texture texture, Rect target, float rotation, int color)
+    {
+        this.drawTexture(texture, target, null, rotation, target.getWidth() / 2.0f, target.getHeight() / 2.0f, color);
+    }
+
+    protected void drawTexture(Texture texture, Rect target, Rect source, float rotation)
+    {
+        this.drawTexture(texture, target, source, rotation, target.getWidth() / 2.0f, target.getHeight() / 2.0f);
+    }
+
+    protected void drawTexture(Texture texture, Rect target, Rect source, float rotation, float rotationOriginX, float rotationOriginY)
+    {
+        this.drawTexture(texture, target, source, rotation, target.getWidth() / 2.0f, target.getHeight() / 2.0f, 0xFFFFFFFF);
+    }
+
+    protected void drawTexture(Texture texture, Rect target, Rect source, float rotation, float rotationOriginX, float rotationOriginY, int color)
     {
         if (texture == null || target == null)
         {
@@ -181,6 +206,18 @@ public abstract class Game
         glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
         glBindTexture(GL_TEXTURE_2D, texture.getTextureID());
 
+        glPushMatrix();
+
+        glTranslatef(target.getX() + rotationOriginX, target.getY() + rotationOriginY, 0.0f);
+        glRotatef(rotation, 0.0f, 0.0f, 1.0f);
+        glTranslatef(-(target.getX() + rotationOriginX), -(target.getY() + rotationOriginY), 0.0f);
+
+        float a = (float) (color >> 24 & 255) / 255.0F;
+        float r = (float) (color >> 16 & 255) / 255.0F;
+        float g = (float) (color >> 8 & 255) / 255.0F;
+        float b = (float) (color & 255) / 255.0F;
+        glColor4f(r, g, b, a);
+
         glBegin(GL_QUADS);
         glTexCoord2f(source.getX(), source.getY());
         glVertex2f(target.getX(), target.getY());
@@ -195,6 +232,10 @@ public abstract class Game
         glVertex2f(target.getX() + target.getWidth(), target.getY());
 
         glEnd();
+
+        glColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+
+        glPopMatrix();
 
         glDisable(GL_TEXTURE_2D);
     }
